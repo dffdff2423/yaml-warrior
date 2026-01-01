@@ -5,5 +5,6 @@
 -->
 
 <Solution>
+  <Project Path="YamlWarrior.JsonRPC/YamlWarrior.JsonRPC.csproj" />
   <Project Path="YamlWarrior/YamlWarrior.csproj" />
 </Solution>

@@ -10,19 +10,6 @@ using JetBrains.Annotations;
 namespace YamlWarrior.JsonRPC.Protocol;
 
 /// <summary>
-/// Response representing a failed RPC request
-/// </summary>
-[PublicAPI]
-public sealed record RPCErrorResponse : RPCResponse {
-    /// <summary>
-    /// This member is REQUIRED if there is an error. This member MUST NOT exist if there was no error triggered during
-    /// invocation.
-    /// </summary>
-    [JsonPropertyName("error"), JsonRequired]
-    public required RPCError Error { get; init; }
-}
-
-/// <summary>
 /// JSON RPC error object. The static members represent errors specified in the protocol.
 /// </summary>
 [PublicAPI]
@@ -49,7 +36,7 @@ public sealed record RPCError {
     /// The value of this member is defined by the Server (e.g. detailed error information, nested errors etc.).
     /// </summary>
     [JsonPropertyName("data")]
-    public JsonElement? Data;
+    public JsonElement? Data { get; init; }
 
     /// <summary>
     /// Invalid JSON was received by the server or an error occurred on the server while parsing the JSON text.

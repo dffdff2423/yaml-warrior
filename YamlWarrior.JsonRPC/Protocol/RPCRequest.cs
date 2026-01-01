@@ -56,6 +56,10 @@ public sealed record RPCRequest {
     /// SHOULD NOT contain fractional parts [2]
     /// </summary>
     /// <remarks>
+    /// In the event the client provides a null value for this field it will be null rather than have a null value. <br />
+    /// <br />
+    /// Extra Info: <br />
+    ///
     /// The Server MUST reply with the same value in the Response object if included. This member is used to correlate
     /// the context between the two objects. <br />
     /// <br />
@@ -66,5 +70,5 @@ public sealed record RPCRequest {
     /// fractions.
     /// </remarks>
     [JsonPropertyName("id")]
-    public JsonElement? Id;
+    public RPCId? Id { get; init; }
 }

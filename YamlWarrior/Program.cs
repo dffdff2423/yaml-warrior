@@ -2,12 +2,16 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 
+
+using YamlWarrior.Common.Logger;
+
 namespace YamlWarrior;
 
 internal static class Program
 {
     private static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
+        Log.I("test");
+        Log.E("asdf");
     }
 }

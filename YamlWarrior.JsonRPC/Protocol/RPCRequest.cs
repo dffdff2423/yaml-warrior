@@ -47,7 +47,7 @@ public sealed record RPCRequest {
     ///     </item>
     /// </list>
     /// </remarks>
-    [JsonPropertyName("params")]
+    [JsonPropertyName("params"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public JsonElement? Params { get; init; }
 
     /// <summary>
@@ -69,6 +69,6 @@ public sealed record RPCRequest {
     /// [2] Fractional parts may be problematic, since many decimal fractions cannot be represented exactly as binary
     /// fractions.
     /// </remarks>
-    [JsonPropertyName("id")]
+    [JsonPropertyName("id"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public RPCId? Id { get; init; }
 }

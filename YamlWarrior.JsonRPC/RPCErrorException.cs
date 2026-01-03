@@ -9,9 +9,14 @@ namespace YamlWarrior.JsonRPC;
 /// <summary>
 /// Exception representing an RPC error.
 /// </summary>
-public sealed class RPCErrorException(RPCError err, Exception? inner = null) : Exception(err.Message, inner) {
+public sealed class RPCErrorException(RPCError err, RPCId? id = null, Exception? inner = null) : Exception(err.Message, inner) {
     /// <summary>
     /// The RPC error
     /// </summary>
     public readonly RPCError Error = err;
+
+    /// <summary>
+    /// The Id of the error (if known)
+    /// </summary>
+    public readonly RPCId? Id = id;
 }

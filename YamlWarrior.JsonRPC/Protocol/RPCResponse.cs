@@ -30,8 +30,8 @@ public abstract record RPCResponse {
     /// <item>If there was an error in detecting the id in the Request object (e.g. Parse error/Invalid Request), it MUST be (json) Null.</item>
     /// </list>
     /// </summary>
-    [JsonPropertyName("id")]
-    public required RPCId Id { get; init; }
+    [JsonPropertyName("id"), JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+    public required RPCId? Id { get; init; }
 
     /// <summary>
     /// Was this RPC Request successful?
@@ -50,8 +50,8 @@ public abstract record RPCResponse {
         /// This member MUST NOT exist if there was an error invoking the method.
         /// The value of this member is determined by the method invoked on the Server.
         /// </summary>
-        [JsonPropertyName("result")]
-        public JsonElement Result { get; init; }
+        [JsonPropertyName("result"), JsonIgnore(Condition = JsonIgnoreCondition.Never)]
+        public JsonElement? Result { get; init; }
 
         [JsonIgnore]
         public override bool IsSuccess => true;

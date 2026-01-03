@@ -23,4 +23,14 @@ public sealed class RPCMethodAttribute(string methodName) : Attribute {
     /// Return value for the RPC method. Null for no return value.
     /// </summary>
     public Type? Return { get; set; }
+
+    /// <summary>
+    /// If this method can be canceled
+    /// </summary>
+    public bool Cancelable { get; set; }
+
+    /// <summary>
+    /// If this method can report progress
+    /// </summary>
+    public bool ReportsProgress { get; set; }
 }

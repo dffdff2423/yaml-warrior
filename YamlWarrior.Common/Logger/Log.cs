@@ -25,7 +25,7 @@ public static class Log {
     /// <summary>
     /// The log output file. This should be set by the application.
     /// </summary>
-    private static TextWriter _log = Console.Out;
+    private static TextWriter _log = Console.Error;
 
     /// <summary>
     /// Minimum log level to be printed.
@@ -52,6 +52,7 @@ public static class Log {
     /// Log a message to the log file. Applies fancy coloring if output is a tty.
     /// </summary>
     public static void WriteLog(string file, int line, LogLevel level, string txt) {
+        _logInitialized = true;
         if (RequiredLevel > level)
             return;
 

@@ -35,7 +35,7 @@ public sealed record RPCError {
     /// This may be omitted.
     /// The value of this member is defined by the Server (e.g. detailed error information, nested errors etc.).
     /// </summary>
-    [JsonPropertyName("data")]
+    [JsonPropertyName("data"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public JsonElement? Data { get; init; }
 
     /// <summary>

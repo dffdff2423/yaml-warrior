@@ -9,7 +9,9 @@ using YamlWarrior.JsonRPC.Protocol;
 namespace YamlWarrior.JsonRPC.Tests.Protocol;
 
 public sealed class ResponseSerialization {
-    private const string SucessEampleTxt =
+    private readonly JsonSerializerOptions PP = new() { WriteIndented = true };
+
+    private const string SuccessExampleTxt =
         """
         {
           "result": "blah",
@@ -25,9 +27,9 @@ public sealed class ResponseSerialization {
 
     [Test]
     public void WriteSuccess() {
-        var str = JsonSerializer.Serialize(SuccessExample, new JsonSerializerOptions() { WriteIndented = true});
+        var str = JsonSerializer.Serialize(SuccessExample, PP);
         Console.WriteLine(str);
-        Assert.That(str, Is.EqualTo(SucessEampleTxt));
+        Assert.That(str, Is.EqualTo(SuccessExampleTxt));
     }
 
     private const string FailureExampleTxt =
@@ -49,16 +51,16 @@ public sealed class ResponseSerialization {
     };
     [Test]
     public void WriteFailure() {
-        var str = JsonSerializer.Serialize(FailExample, new JsonSerializerOptions { WriteIndented = true });
+        var str = JsonSerializer.Serialize(FailExample, PP);
         Assert.That(str, Is.EqualTo(FailureExampleTxt));
     }
 
     [Test]
     public void ReadSuccess() {
-        var val = (RPCResponse.Success)JsonSerializer.Deserialize<RPCResponse>(SucessEampleTxt)!;
+        var val = (RPCResponse.Success)JsonSerializer.Deserialize<RPCResponse>(SuccessExampleTxt)!;
         using (Assert.EnterMultipleScope()) {
             Assert.That(val.Id, Is.EqualTo(SuccessExample.Id));
-            Assert.That(val.Result.GetString(), Is.EqualTo("blah"));
+            Assert.That(val.Result?.GetString(), Is.EqualTo("blah"));
         }
     }
 

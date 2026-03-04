@@ -2,35 +2,62 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 
+using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
 
 using JetBrains.Annotations;
 
 using YamlWarrior.Common.Logger;
+using YamlWarrior.Robust.TypeInfo;
 
 namespace YamlWarrior.Robust.Assemblies;
 
-/// <summary>
-/// A content assembly in an RT project (eg. Content.Server in ss14).
-/// </summary>
 [PublicAPI]
-public class ContentAssembly {
-    private readonly EngineAssemblies _engine;
-    private readonly Assembly _asm;
-    private readonly string _path;
+public static class ContentAssembly {
+    /// <summary>
+    /// Extract DataDefinitions et al. from an assembly.
+    /// </summary>
+    /// <param name="engine">Engine info</param>
+    /// <param name="path">Assembly to extract</param>
+    public static AssemblyTypes ExtractYamlTypes(EngineAssemblies engine, string path) {
+        var infos = new AssemblyTypes();
 
-    public ContentAssembly(EngineAssemblies engine, string path) {
-        _path = path;
-        _engine = engine;
+        Log.I($"Processing assembly {path}");
+        var asm = Assembly.LoadFrom(path);
 
-        Log.I($"Loading assembly {path}");
-        _asm = Assembly.LoadFrom(path);
-
-        var types = _asm.GetTypes();
+        var types = asm.GetTypes();
         foreach (var ty in types) {
-            if (ty.GetCustomAttribute(_engine.PrototypeAttribute) != null) {
+            var protoAttr = ty.GetCustomAttribute(engine.PrototypeAttribute);
+            if (protoAttr != null) {
                 Log.D($"Found prototype {ty.AssemblyQualifiedName}");
+                var kindId = (string?)engine.PrototypeAttributeTypeProperty.GetValue(protoAttr);
+                if (kindId == null)
+                    kindId = ConvertTypeNameToPrototypeKindId(ty.Name);
+
+                // Prototypes should not contain generics
+                Debug.Assert(!ty.ContainsGenericParameters);
+                Debug.Assert(ty.FullName != null);
+
+                infos.Prototypes.Add(kindId, new PrototypeInfo { KindId = kindId, FullName = ty.FullName});
             }
         }
+
+        return infos;
+    }
+
+    private static string ConvertTypeNameToPrototypeKindId(string str) {
+        const string prototypeNameEnding = "Prototype";
+
+        // Taken directly from RT.
+        // SPDX-SnippetBegin
+        // SPDX-SnippetCopyrightText: Copyright (c) 2017-2026 Space Wizards Federation
+        // SPDX-License-Identifier: MIT
+        var name = str.AsSpan();
+        if (!str.EndsWith(prototypeNameEnding))
+            return $"{char.ToLowerInvariant(name[0])}{name.Slice(1).ToString()}";
+
+        return $"{char.ToLowerInvariant(name[0])}{name.Slice(1, name.Length - prototypeNameEnding.Length - 1).ToString()}";
+        // SPDX-SnippetEnd
     }
 }

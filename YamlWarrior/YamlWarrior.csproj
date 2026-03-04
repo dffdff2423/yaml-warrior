@@ -17,5 +17,7 @@
     <ItemGroup>
         <ProjectReference Include="../YamlWarrior.Common/YamlWarrior.Common.csproj" />
         <ProjectReference Include="../YamlWarrior.Robust/YamlWarrior.Robust.csproj" />
+
+        <PackageReference Include="JetBrains.Annotations" PrivateAssets="all" />
     </ItemGroup>
 </Project>

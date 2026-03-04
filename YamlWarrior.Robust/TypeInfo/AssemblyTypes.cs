@@ -7,11 +7,9 @@ using JetBrains.Annotations;
 namespace YamlWarrior.Robust.TypeInfo;
 
 [PublicAPI]
-public sealed record PrototypeInfo {
-    public required string FullName { get; init; }
-
+public sealed record AssemblyTypes {
     /// <summary>
-    /// `entity` in `-type: entity`
+    /// Map of KindId to Prototype
     /// </summary>
-    public required string KindId { get; init; }
+    public Dictionary<string, PrototypeInfo> Prototypes { get; init; } = new();
 }

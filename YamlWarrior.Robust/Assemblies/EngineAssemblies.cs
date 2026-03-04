@@ -12,6 +12,7 @@ public sealed class EngineAssemblies {
     public readonly Assembly Shared;
 
     public readonly Type PrototypeAttribute;
+    public readonly PropertyInfo PrototypeAttributeTypeProperty;
 
     public EngineAssemblies(string sharedPath) {
         Log.I($"Loading engine assembly: {sharedPath}");
@@ -22,7 +23,13 @@ public sealed class EngineAssemblies {
             Log.F($"Failed to load `{RobustNames.PrototypeAttribute} from {sharedPath}");
             throw new InvalidDataException(nameof(sharedPath));
         }
-
         PrototypeAttribute = prototype;
+
+        var typeField = prototype.GetProperty("Type");
+        if (typeField == null) {
+            Log.F($"Failed to load field `Type` from `{RobustNames.PrototypeAttribute} in assembly {sharedPath}");
+            throw new InvalidDataException(nameof(sharedPath));
+        }
+        PrototypeAttributeTypeProperty = typeField;
     }
 }

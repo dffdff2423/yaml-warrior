@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 using System.Diagnostics;
+using System.Text.Json;
 
 using YamlWarrior.Common.CommandLine;
 using YamlWarrior.Common.Platform;
@@ -27,6 +28,7 @@ internal static class Program {
         var contentSharedPath = Path.Join(build, AssemblyNames.ContentSharedPath);
 
         var engine = new EngineAssemblies(rtSharedPath);
-        var contentShared = new ContentAssembly(engine, contentSharedPath);
+        var sharedInfos = ContentAssembly.ExtractYamlTypes(engine, contentSharedPath);
+        Console.WriteLine(JsonSerializer.Serialize(sharedInfos, new JsonSerializerOptions { WriteIndented = true }));
     }
 }

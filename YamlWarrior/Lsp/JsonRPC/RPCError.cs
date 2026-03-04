@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 using JetBrains.Annotations;
 
-namespace YamlWarrior.JsonRPC.Protocol;
+namespace YamlWarrior.Lsp.JsonRPC;
 
 /// <summary>
 /// JSON RPC error object. The static members represent errors specified in the protocol.

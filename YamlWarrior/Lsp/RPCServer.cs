@@ -11,10 +11,10 @@ using System.Text.Json;
 using JetBrains.Annotations;
 
 using YamlWarrior.Common.Logger;
-using YamlWarrior.JsonRPC.Annotations;
-using YamlWarrior.JsonRPC.Protocol;
+using YamlWarrior.Lsp.Annotations;
+using YamlWarrior.Lsp.JsonRPC;
 
-namespace YamlWarrior.JsonRPC;
+namespace YamlWarrior.Lsp;
 
 [PublicAPI]
 public sealed class RPCServer {

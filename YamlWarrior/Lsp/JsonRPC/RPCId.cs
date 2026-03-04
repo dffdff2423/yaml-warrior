@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 using JetBrains.Annotations;
 
-namespace YamlWarrior.JsonRPC.Protocol;
+namespace YamlWarrior.Lsp.JsonRPC;
 
 /// <summary>
 /// JSON RPC message id varient. Can be a string or an int.

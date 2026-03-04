@@ -7,7 +7,7 @@ using System.Text.Json.Serialization;
 
 using JetBrains.Annotations;
 
-namespace YamlWarrior.JsonRPC.Protocol;
+namespace YamlWarrior.Lsp.JsonRPC;
 
 /// <summary>
 /// JsonRPC 2.0 Request

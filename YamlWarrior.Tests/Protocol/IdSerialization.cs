@@ -4,9 +4,9 @@
 
 using System.Text.Json;
 
-using YamlWarrior.JsonRPC.Protocol;
+using YamlWarrior.Lsp.JsonRPC;
 
-namespace YamlWarrior.JsonRPC.Tests.Protocol;
+namespace YamlWarrior.Tests.Protocol;
 
 public sealed class IdSerialization {
     [Test]

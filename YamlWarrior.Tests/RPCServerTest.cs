@@ -10,10 +10,11 @@ using JetBrains.Annotations;
 
 using Newtonsoft.Json.Linq;
 
-using YamlWarrior.JsonRPC.Annotations;
-using YamlWarrior.JsonRPC.Protocol;
+using YamlWarrior.Lsp;
+using YamlWarrior.Lsp.Annotations;
+using YamlWarrior.Lsp.JsonRPC;
 
-namespace YamlWarrior.JsonRPC.Tests;
+namespace YamlWarrior.Tests;
 
 public sealed class RPCServerTest {
     private const string TestAName = "test/a";

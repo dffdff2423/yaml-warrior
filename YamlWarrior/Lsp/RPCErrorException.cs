@@ -2,9 +2,9 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 
-using YamlWarrior.JsonRPC.Protocol;
+using YamlWarrior.Lsp.JsonRPC;
 
-namespace YamlWarrior.JsonRPC;
+namespace YamlWarrior.Lsp;
 
 /// <summary>
 /// Exception representing an RPC error.

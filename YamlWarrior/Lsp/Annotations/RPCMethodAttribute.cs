@@ -4,7 +4,7 @@
 
 using JetBrains.Annotations;
 
-namespace YamlWarrior.JsonRPC.Annotations;
+namespace YamlWarrior.Lsp.Annotations;
 
 [PublicAPI]
 [AttributeUsage(AttributeTargets.Method)]

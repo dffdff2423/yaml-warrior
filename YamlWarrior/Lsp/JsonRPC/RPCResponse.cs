@@ -5,14 +5,11 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using JetBrains.Annotations;
-
 namespace YamlWarrior.Lsp.JsonRPC;
 
 /// <summary>
 /// Base type for JsonRPC 2.0 responses
 /// </summary>
-[PublicAPI]
 [JsonConverter(typeof(RPCResponseConverter))]
 public abstract record RPCResponse {
     private RPCResponse() { } // Don't allow anything outside of this class to inherit from this.
@@ -43,7 +40,6 @@ public abstract record RPCResponse {
     /// <summary>
     /// Response representing a successful method invocation.
     /// </summary>
-    [PublicAPI]
     public sealed record Success : RPCResponse {
         /// <summary>
         /// This member is REQUIRED on success.
@@ -60,7 +56,6 @@ public abstract record RPCResponse {
     /// <summary>
     /// Response representing a failed RPC request
     /// </summary>
-    [PublicAPI]
     public sealed record Failure : RPCResponse {
         /// <summary>
         /// This member is REQUIRED if there is an error. This member MUST NOT exist if there was no error triggered during

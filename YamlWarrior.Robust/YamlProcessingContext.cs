@@ -9,10 +9,9 @@ using YamlWarrior.Robust.TypeInfo;
 
 namespace YamlWarrior.Robust;
 
-[PublicAPI]
 public sealed class YamlProcessingContext(string robustSharedPath) {
     public AssemblyTypes RobustTypes { get; private set; } = new();
-    private EngineAssemblies _engine = new(robustSharedPath);
+    private readonly EngineAssemblies _engine = new(robustSharedPath);
 
     /// <summary>
     /// Adds a content assembly to this context.

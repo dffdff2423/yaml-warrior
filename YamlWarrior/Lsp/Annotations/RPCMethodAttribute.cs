@@ -2,11 +2,8 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 
-using JetBrains.Annotations;
-
 namespace YamlWarrior.Lsp.Annotations;
 
-[PublicAPI]
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class RPCMethodAttribute(string methodName) : Attribute {
     /// <summary>

@@ -9,18 +9,17 @@ using YamlWarrior.Common.Logger;
 namespace YamlWarrior.Robust.Assemblies;
 
 public sealed class EngineAssemblies {
-    public readonly Assembly Shared;
-
     public readonly Type PrototypeAttribute;
     public readonly PropertyInfo PrototypeAttributeTypeProperty;
 
+    // ReSharper disable once InconsistentNaming
     public readonly Type IInheritingPrototype;
 
     public EngineAssemblies(string sharedPath) {
         Log.I($"Loading engine assembly: {sharedPath}");
-        Shared = Assembly.LoadFrom(sharedPath);
+        var shared = Assembly.LoadFrom(sharedPath);
 
-        var prototype = Shared.GetType(RobustNames.PrototypeAttribute);
+        var prototype = shared.GetType(RobustNames.PrototypeAttribute);
         if (prototype == null) {
             Log.F($"Failed to load `{RobustNames.PrototypeAttribute} from {sharedPath}");
             throw new InvalidDataException(nameof(sharedPath));
@@ -34,7 +33,7 @@ public sealed class EngineAssemblies {
         }
         PrototypeAttributeTypeProperty = typeField;
 
-        var iInheriting = Shared.GetType(RobustNames.IInheritingPrototype);
+        var iInheriting = shared.GetType(RobustNames.IInheritingPrototype);
         if (iInheriting == null) {
             Log.F($"Failed to load `{RobustNames.IInheritingPrototype} from {sharedPath}");
             throw new InvalidDataException(nameof(sharedPath));

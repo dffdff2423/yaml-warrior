@@ -16,7 +16,6 @@ using YamlWarrior.Lsp.JsonRPC;
 
 namespace YamlWarrior.Lsp;
 
-[PublicAPI]
 public sealed class RPCServer {
     private readonly PipeReader _istream;
     private readonly Stream _ostream;
@@ -143,7 +142,7 @@ public sealed class RPCServer {
     /// Read the first Json object from the stream and launch a single request if it is a object or multiple if an array.
     /// </summary>
     /// <exception cref="RPCErrorException">If the JSON failed to parse or the request is invalid</exception>
-    public async Task InvokeNextInternal() {
+    private async Task InvokeNextInternal() {
         var doc = await ReadFirstJsonAsync(_istream);
         var elem = doc.RootElement;
 
@@ -365,7 +364,6 @@ public sealed class RPCServer {
             .Select(v => v.TokenSource!.CancelAsync()));
 }
 
-[PublicAPI]
 public sealed class MethodInvocationContext {
     /// <summary>
     /// Token to cancel the request
@@ -386,7 +384,6 @@ public sealed class MethodInvocationContext {
 /// <summary>
 /// RPC method. Must be annotated with <see cref="RPCMethodAttribute"/>
 /// </summary>
-[PublicAPI]
 public delegate Task<object?> RPCMethod(MethodInvocationContext ctx, object? args);
 
 internal sealed record RPCMethodData {

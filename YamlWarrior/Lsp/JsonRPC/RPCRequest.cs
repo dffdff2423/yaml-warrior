@@ -5,14 +5,11 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using JetBrains.Annotations;
-
 namespace YamlWarrior.Lsp.JsonRPC;
 
 /// <summary>
 /// JsonRPC 2.0 Request
 /// </summary>
-[PublicAPI]
 public sealed record RPCRequest {
     /// <summary>
     /// A String specifying the version of the JSON-RPC protocol. MUST be exactly "2.0".

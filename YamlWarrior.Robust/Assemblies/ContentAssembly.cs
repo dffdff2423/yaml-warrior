@@ -16,7 +16,6 @@ namespace YamlWarrior.Robust.Assemblies;
 /// Operations on Content assemblies. Note that we consider any assembly which we parse DataDefinitions from a content
 /// assembly. Even ones inside engine code.
 /// </summary>
-[PublicAPI]
 public static class ContentAssembly {
     /// <summary>
     /// Extract DataDefinitions et al. from an assembly.
@@ -53,6 +52,7 @@ public static class ContentAssembly {
         return infos;
     }
 
+    [Pure]
     private static string ConvertTypeNameToPrototypeKindId(string str) {
         const string prototypeNameEnding = "Prototype";
 
@@ -69,6 +69,7 @@ public static class ContentAssembly {
     }
 
     extension(Type ty) {
+        [Pure]
         private bool ImplementsInterface(Type other) => ty.GetInterfaces().Contains(other);
     }
 }

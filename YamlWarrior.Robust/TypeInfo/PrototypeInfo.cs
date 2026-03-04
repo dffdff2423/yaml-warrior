@@ -6,7 +6,6 @@ using JetBrains.Annotations;
 
 namespace YamlWarrior.Robust.TypeInfo;
 
-[PublicAPI]
 public sealed record PrototypeInfo {
     public required string FullName { get; init; }
 

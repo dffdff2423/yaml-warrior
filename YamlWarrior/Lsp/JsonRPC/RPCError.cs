@@ -5,14 +5,11 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using JetBrains.Annotations;
-
 namespace YamlWarrior.Lsp.JsonRPC;
 
 /// <summary>
 /// JSON RPC error object. The static members represent errors specified in the protocol.
 /// </summary>
-[PublicAPI]
 public sealed record RPCError {
     /// <summary>
     /// A Number that indicates the error type that occurred.

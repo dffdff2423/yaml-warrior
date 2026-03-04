@@ -5,14 +5,11 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-using JetBrains.Annotations;
-
 namespace YamlWarrior.Lsp.JsonRPC;
 
 /// <summary>
 /// JSON RPC message id varient. Can be a string or an int.
 /// </summary>
-[PublicAPI]
 [JsonConverter(typeof(RPCIdConverter))]
 public abstract record RPCId {
     private RPCId() {} // Disallow inheritience outside of this class

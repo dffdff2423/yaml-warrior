@@ -2,13 +2,10 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 
-using JetBrains.Annotations;
-
 using YamlWarrior.Common.Logger;
 
 namespace YamlWarrior.Robust.TypeInfo;
 
-[PublicAPI]
 public sealed record AssemblyTypes {
     /// <summary>
     /// Map of KindId to Prototype

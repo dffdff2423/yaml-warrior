@@ -2,12 +2,22 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 
+using JetBrains.Annotations;
+
 namespace YamlWarrior.Robust.Assemblies;
 
 // TODO: this should be in some kind of config file
+[PublicAPI]
 public static class AssemblyNames {
-    public const string ContentSharedPath = "Content.Server/Content.Shared.dll";
     public const string RobustSharedPath = "Content.Server/Robust.Shared.dll";
 
-    public const string RobustShared = "Robust.Shared";
+    public static string[] DefaultContentAssemblyPathSegments = [
+        "Content.Client/Content.Client.dll",
+        "Content.Client/Robust.Client.dll",
+        "Content.Server/Content.Server.dll",
+        "Content.Server/Content.Shared.dll",
+        "Content.Server/Robust.Server.dll",
+        "Content.Server/Robust.Shared.Maths.dll",
+        "Content.Server/Robust.Shared.dll",
+    ];
 }

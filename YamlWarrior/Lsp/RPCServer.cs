@@ -133,7 +133,7 @@ public sealed class RPCServer {
                 inner: e);
         } catch (RPCErrorException) {
             throw; // Do not fallthrough to the below case
-        }catch (Exception e) {
+        } catch (Exception e) {
             Log.E($"Got exception while invoking {req.Method}: {e.Message}");
             throw new RPCErrorException(RPCError.InternalError, id: req.Id, inner: e);
         }

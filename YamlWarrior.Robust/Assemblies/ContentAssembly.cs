@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 using System.Diagnostics;
-using System.Globalization;
 using System.Reflection;
 
 using JetBrains.Annotations;
@@ -13,6 +12,10 @@ using YamlWarrior.Robust.TypeInfo;
 
 namespace YamlWarrior.Robust.Assemblies;
 
+/// <summary>
+/// Operations on Content assemblies. Note that we consider any assembly which we parse DataDefinitions from a content
+/// assembly. Even ones inside engine code.
+/// </summary>
 [PublicAPI]
 public static class ContentAssembly {
     /// <summary>
@@ -39,7 +42,11 @@ public static class ContentAssembly {
                 Debug.Assert(!ty.ContainsGenericParameters);
                 Debug.Assert(ty.FullName != null);
 
-                infos.Prototypes.Add(kindId, new PrototypeInfo { KindId = kindId, FullName = ty.FullName});
+                infos.Prototypes.Add(kindId, new PrototypeInfo {
+                    KindId = kindId,
+                    FullName = ty.FullName,
+                    SupportsInheritance = ty.ImplementsInterface(engine.IInheritingPrototype),
+                });
             }
         }
 
@@ -59,5 +66,9 @@ public static class ContentAssembly {
 
         return $"{char.ToLowerInvariant(name[0])}{name.Slice(1, name.Length - prototypeNameEnding.Length - 1).ToString()}";
         // SPDX-SnippetEnd
+    }
+
+    extension(Type ty) {
+        private bool ImplementsInterface(Type other) => ty.GetInterfaces().Contains(other);
     }
 }

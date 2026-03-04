@@ -9,4 +9,7 @@ namespace YamlWarrior.Robust.Assemblies;
 /// </summary>
 public static class RobustNames {
     public const string PrototypeAttribute = "Robust.Shared.Prototypes.PrototypeAttribute";
+
+    // ReSharper disable once InconsistentNaming
+    public const string IInheritingPrototype = "Robust.Shared.Prototypes.IInheritingPrototype";
 }

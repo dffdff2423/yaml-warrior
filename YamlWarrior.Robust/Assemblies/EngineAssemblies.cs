@@ -14,6 +14,8 @@ public sealed class EngineAssemblies {
     public readonly Type PrototypeAttribute;
     public readonly PropertyInfo PrototypeAttributeTypeProperty;
 
+    public readonly Type IInheritingPrototype;
+
     public EngineAssemblies(string sharedPath) {
         Log.I($"Loading engine assembly: {sharedPath}");
         Shared = Assembly.LoadFrom(sharedPath);
@@ -31,5 +33,12 @@ public sealed class EngineAssemblies {
             throw new InvalidDataException(nameof(sharedPath));
         }
         PrototypeAttributeTypeProperty = typeField;
+
+        var iInheriting = Shared.GetType(RobustNames.IInheritingPrototype);
+        if (iInheriting == null) {
+            Log.F($"Failed to load `{RobustNames.IInheritingPrototype} from {sharedPath}");
+            throw new InvalidDataException(nameof(sharedPath));
+        }
+        IInheritingPrototype = iInheriting;
     }
 }

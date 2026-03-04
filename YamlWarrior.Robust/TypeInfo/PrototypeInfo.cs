@@ -14,4 +14,9 @@ public sealed record PrototypeInfo {
     /// `entity` in `-type: entity`
     /// </summary>
     public required string KindId { get; init; }
+
+    /// <summary>
+    /// Wheaten or not the prototype supports yaml inheritance
+    /// </summary>
+    public bool SupportsInheritance { get; init; }
 }

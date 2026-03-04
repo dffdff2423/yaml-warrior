@@ -5,6 +5,8 @@
 using System.Diagnostics;
 
 using YamlWarrior.Common.CommandLine;
+using YamlWarrior.Common.Platform;
+using YamlWarrior.Robust.Assemblies;
 
 namespace YamlWarrior;
 
@@ -14,13 +16,17 @@ internal static class Program {
             // TODO: set log level
             new Flag(Type: ArgumentType.Bool, Long: "dump", HelpText: "Dump assemblies then exit"),
             // TODO: allow repeating this flag
-            new Flag(Type: ArgumentType.String, Long: "assembly", Short: 'a', HelpText: "Path to assembly that should be loaded"),
+            new Flag(Type: ArgumentType.String, Long: "assembly-dir", Short: 'a', HelpText: "Path to an ss14 build directory"),
         };
         var opts = ArgumentParser.ParseArguments(flags, "-a <assembly> [options...]", argv);
 
         Debug.Assert((bool)opts["dump"]);
 
-        var assembly = (string)opts["assembly"];
-        Console.WriteLine(assembly);
+        var build = PathUtil.ExpandTilde((string)opts["assembly-dir"]);
+        var rtSharedPath = Path.Join(build, AssemblyNames.RobustSharedPath);
+        var contentSharedPath = Path.Join(build, AssemblyNames.ContentSharedPath);
+
+        var engine = new EngineAssemblies(rtSharedPath);
+        var contentShared = new ContentAssembly(engine, contentSharedPath);
     }
 }

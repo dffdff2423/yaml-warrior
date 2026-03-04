@@ -1,0 +1,28 @@
+// SPDX-FileCopyrightText: (C) 2026 dffdff2423 <dffdff2423@gmail.com>
+//
+// SPDX-License-Identifier: GPL-3.0-only
+
+using System.Reflection;
+
+using YamlWarrior.Common.Logger;
+
+namespace YamlWarrior.Robust.Assemblies;
+
+public sealed class EngineAssemblies {
+    public readonly Assembly Shared;
+
+    public readonly Type PrototypeAttribute;
+
+    public EngineAssemblies(string sharedPath) {
+        Log.I($"Loading engine assembly: {sharedPath}");
+        Shared = Assembly.LoadFrom(sharedPath);
+
+        var prototype = Shared.GetType(RobustNames.PrototypeAttribute);
+        if (prototype == null) {
+            Log.F($"Failed to load `{RobustNames.PrototypeAttribute} from {sharedPath}");
+            throw new InvalidDataException(nameof(sharedPath));
+        }
+
+        PrototypeAttribute = prototype;
+    }
+}

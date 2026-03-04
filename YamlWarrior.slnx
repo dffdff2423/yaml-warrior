@@ -8,5 +8,6 @@
   <Project Path="YamlWarrior.Common/YamlWarrior.Common.csproj" />
   <Project Path="YamlWarrior.JsonRPC.Tests/YamlWarrior.JsonRPC.Tests.csproj" />
   <Project Path="YamlWarrior.JsonRPC/YamlWarrior.JsonRPC.csproj" />
+  <Project Path="YamlWarrior.Robust/YamlWarrior.Robust.csproj" />
   <Project Path="YamlWarrior/YamlWarrior.csproj" />
 </Solution>

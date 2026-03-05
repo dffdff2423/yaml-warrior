@@ -55,7 +55,7 @@ internal class RPCIdConverter : JsonConverter<RPCId> {
                 writer.WriteNumberValue(i.Value);
                 break;
             default:
-                throw new ArgumentException("Value is not a kn own RPCId value");
+                throw new ArgumentException("Value is not a known RPCId value");
         }
     }
 }

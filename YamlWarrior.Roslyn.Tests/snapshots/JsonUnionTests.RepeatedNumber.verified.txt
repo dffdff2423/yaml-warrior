@@ -1,0 +1,44 @@
+﻿[
+  {
+    Location: /*
+
+    [JsonUnionVariant(JsonUnionVariantKind.Number)]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    public sealed partial record Integer(int Value) : DummyUnion;
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+*/
+ : (6,4)-(7,65),
+    Message: Cannot have multiple number variants,
+    Severity: Error,
+    Descriptor: {
+      Id: YW1001,
+      Title: Malformed Union Variant,
+      MessageFormat: Cannot have multiple number variants,
+      Category: YamlWarrior.Roslyn.Generators,
+      DefaultSeverity: Error,
+      IsEnabledByDefault: true
+    }
+  },
+  {
+    Location: /*
+
+    [JsonUnionVariant(JsonUnionVariantKind.Number)]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    public sealed partial record Integer2(int Value) : DummyUnion;
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+}
+*/
+ : (9,4)-(10,66),
+    Message: Cannot have multiple number variants,
+    Severity: Error,
+    Descriptor: {
+      Id: YW1001,
+      Title: Malformed Union Variant,
+      MessageFormat: Cannot have multiple number variants,
+      Category: YamlWarrior.Roslyn.Generators,
+      DefaultSeverity: Error,
+      IsEnabledByDefault: true
+    }
+  }
+]

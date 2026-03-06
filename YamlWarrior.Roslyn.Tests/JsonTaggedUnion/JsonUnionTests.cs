@@ -23,4 +23,23 @@ public static class JsonUnionTests {
     [Test]
     public static Task DummyClass()
         => GeneratorTest.Verify(TestCode);
+
+    private static readonly string TestCode2 = """
+                                              using YamlWarrior.Common.Serialization;
+
+                                              [JsonUnion]
+                                              public abstract partial record DummyUnion {
+                                                  private DummyUnion() {}
+
+                                                  [JsonUnionVariant(JsonUnionVariantKind.Number)]
+                                                  public sealed partial record Integer(int Value) : DummyUnion;
+
+                                                  [JsonUnionVariant(JsonUnionVariantKind.Number)]
+                                                  public sealed partial record Integer2(int Value) : DummyUnion;
+                                              }
+                                              """;
+
+    [Test]
+    public static Task RepeatedNumber()
+        => GeneratorTest.Verify(TestCode2, genShouldError: true);
 }

@@ -15,36 +15,36 @@ namespace YamlWarrior.Roslyn.Generators;
 public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
     private const string ParentAttributeName = "YamlWarrior.Common.Serialization.JsonUnionAttribute";
     private const string MemberAttributeName = "YamlWarrior.Common.Serialization.JsonUnionVariantAttribute";
-    // private static readonly string ParentAttributeName = typeof(JsonTaggedUnionAttribute).FullName!;
+    // I swear there is some way for this to work:
+    // private static readonly string ParentAttributeName = typeof(JsonUnionAttribute).FullName!;
     // private static readonly string MemberAttributeName = typeof(JsonUnionVariantKind).FullName!;
 
 
     public void Initialize(IncrementalGeneratorInitializationContext ctx) {
         var provider = ctx.SyntaxProvider
-            .ForAttributeWithMetadataName<(string name, string code)?>(
+            .ForAttributeWithMetadataName<GeneratorOutput>(
                 ParentAttributeName,
                 static (node, _) => node is TypeDeclarationSyntax,
-                static (ctx, _) => GenerateParent((ITypeSymbol)ctx.TargetSymbol))
+                static (ctx, _) => Generate((ITypeSymbol)ctx.TargetSymbol))
             .Where(static type => type != null);
 
         ctx.RegisterSourceOutput(
-            provider.Collect(),
-            static (ctx, sources) => {
-                foreach (var nsrc in sources) {
-                    var (name, code) = nsrc!.Value;
+            provider,
+            static (ctx, output) => {
+                foreach (var diag in output.Diagnostics) {
+                    ctx.ReportDiagnostic(diag);
+                }
+                foreach (var (name, code) in output.Files) {
                     ctx.AddSource(name, code);
                 }
             });
     }
 
-    private static (string, string)? GenerateParent(ITypeSymbol sym) {
+    private static GeneratorOutput Generate(ITypeSymbol sym) {
         var ns = sym.ContainingNamespace.IsGlobalNamespace
             ? string.Empty
             : $"namespace {sym.ContainingNamespace.ToDisplayString()};";
-        var variants = new List<(ITypeSymbol, JsonUnionVariantKind)>();
-        // TODO: emit diagnostic here
-        // if (variants.Count(v => v.Item2 == JsonUnionVariantKind.Number) > 1)
-        //     ctx
+        var variants = new List<(ITypeSymbol sym, JsonUnionVariantKind kind)>();
 
         foreach (var member in sym.GetMembers()) {
             if (member is ITypeSymbol memberTy) {
@@ -56,11 +56,42 @@ public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
 
                 var rawKind = attr.ConstructorArguments.First();
                 if (rawKind.Value == null)
-                    return null;
+                    return new GeneratorOutput(); // Should already be enforced by the c# compiler
                 var kind = (JsonUnionVariantKind)rawKind.Value;
                 variants.Add((memberTy, kind));
             }
         }
+
+        var diag = new List<Diagnostic>();
+        if (variants.Count(v => v.kind == JsonUnionVariantKind.Number) > 1) {
+            diag.AddRange(variants
+                .Where(v => v.kind == JsonUnionVariantKind.Number)
+                .Select(v => Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        id: "YW1001",
+                        title: "Unsupported Duplicate Union Variant",
+                        messageFormat: "Cannot have multiple number variants",
+                        category: "YamlWarrior.Roslyn.Generators",
+                        defaultSeverity: DiagnosticSeverity.Error,
+                        isEnabledByDefault: true),
+                    v.sym.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax().GetLocation() ?? Location.None)));
+        }
+        if (variants.Count(v => v.kind == JsonUnionVariantKind.String) > 1) {
+            diag.AddRange(variants
+                .Where(v => v.kind == JsonUnionVariantKind.String)
+                .Select(v => Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        id: "YW1001",
+                        title: "Unsupported Duplicate Union Variant",
+                        messageFormat: "Cannot have multiple string variants",
+                        category: "YamlWarrior.Roslyn.Generators",
+                        defaultSeverity: DiagnosticSeverity.Error,
+                        isEnabledByDefault: true),
+                    v.sym.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax().GetLocation() ?? Location.None)));
+        }
+
+        if (diag.Count > 0)
+            return new GeneratorOutput { Diagnostics = diag };
 
         var converter = $"{sym.Name}Converter";
 
@@ -103,7 +134,10 @@ public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
               }
               """;
 
-        return ($"{sym}_jsonTaggedUnion.g.cs", txt);
+        return new GeneratorOutput {
+            Files = [($"{sym}_jsonTaggedUnion.g.cs", txt)],
+            Diagnostics = diag,
+        };
     }
 
     private static string AnnotateVariants(IEnumerable<ITypeSymbol> variants, string converter) {

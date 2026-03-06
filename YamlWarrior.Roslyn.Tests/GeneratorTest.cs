@@ -4,6 +4,7 @@
 
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text.Json;
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -14,31 +15,36 @@ using YamlWarrior.Roslyn.Generators;
 namespace YamlWarrior.Roslyn.Tests;
 
 public static class GeneratorTest {
-    public static Task Verify(string src) {
+    public static Task Verify(string src, bool genShouldError = false) {
         var tree = CSharpSyntaxTree.ParseText(src);
 
-        // IEnumerable<PortableExecutableReference> references = [
-        //     MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
-        //     MetadataReference.CreateFromFile(typeof(JsonTaggedUnionAttribute).Assembly.Location),
-        //     MetadataReference.CreateFromFile(Path.Combine(RuntimeEnvironment.GetRuntimeDirectory(), "netstandard.dll")),
-        // ];
         var references = AppDomain.CurrentDomain.GetAssemblies()
             .Where(asm => !asm.IsDynamic && !string.IsNullOrWhiteSpace(asm.Location))
             .Select(asm => MetadataReference.CreateFromFile(asm.Location))
-            .Concat([MetadataReference.CreateFromFile(typeof(JsonUnionVariantAttribute).Assembly.Location)]);
+            .Concat([
+                MetadataReference.CreateFromFile(typeof(JsonUnionVariantAttribute).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(JsonSerializer).Assembly.Location),
+            ]);
 
         var compilation = CSharpCompilation.Create(
             assemblyName: "Test",
             syntaxTrees: [tree],
             references: references,
             options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
+        Assert.That(compilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToArray(), Is.Empty);
 
         var gen = new JsonTaggedUnionGenerator();
         var driver = CSharpGeneratorDriver.Create(gen);
 
         var outDriver = driver.RunGenerators(compilation);
-        Assert.That(compilation.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToArray(), Is.Empty);
+        var results = outDriver.GetRunResult();
 
+        if (genShouldError) {
+            return Verifier.Verify(results.Diagnostics).UseDirectory("snapshots");
+        }
+
+        var newComp = compilation.AddSyntaxTrees(results.GeneratedTrees);
+        Assert.That(newComp.GetDiagnostics().Where(d => d.Severity == DiagnosticSeverity.Error).ToArray(), Is.Empty);
         return Verifier.Verify(outDriver).UseDirectory("snapshots");
     }
 

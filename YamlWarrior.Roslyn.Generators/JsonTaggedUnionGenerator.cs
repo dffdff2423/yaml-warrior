@@ -15,6 +15,7 @@ namespace YamlWarrior.Roslyn.Generators;
 public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
     private const string ParentAttributeName = "YamlWarrior.Common.Serialization.JsonUnionAttribute";
     private const string MemberAttributeName = "YamlWarrior.Common.Serialization.JsonUnionVariantAttribute";
+    private const string ValuePropertyName = "Value";
     // I swear there is some way for this to work:
     // private static readonly string ParentAttributeName = typeof(JsonUnionAttribute).FullName!;
     // private static readonly string MemberAttributeName = typeof(JsonUnionVariantKind).FullName!;
@@ -44,22 +45,20 @@ public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
         var ns = sym.ContainingNamespace.IsGlobalNamespace
             ? string.Empty
             : $"namespace {sym.ContainingNamespace.ToDisplayString()};";
-        var variants = new List<(ITypeSymbol sym, JsonUnionVariantKind kind)>();
+        var variants = new List<(INamedTypeSymbol sym, JsonUnionVariantKind kind)>();
 
-        foreach (var member in sym.GetMembers()) {
-            if (member is ITypeSymbol memberTy) {
-                var attr = memberTy
-                    .GetAttributes()
-                    .SingleOrDefault(attr => attr.AttributeClass?.ToDisplayString() == MemberAttributeName);
-                if (attr == null)
-                    continue;
+        foreach (var member in sym.GetTypeMembers()) {
+            var attr = member
+                .GetAttributes()
+                .SingleOrDefault(attr => attr.AttributeClass?.ToDisplayString() == MemberAttributeName);
+            if (attr == null)
+                continue;
 
-                var rawKind = attr.ConstructorArguments.First();
-                if (rawKind.Value == null)
-                    return new GeneratorOutput(); // Should already be enforced by the c# compiler
-                var kind = (JsonUnionVariantKind)rawKind.Value;
-                variants.Add((memberTy, kind));
-            }
+            var rawKind = attr.ConstructorArguments.First();
+            if (rawKind.Value == null)
+                return new GeneratorOutput(); // Should already be enforced by the c# compiler
+            var kind = (JsonUnionVariantKind)rawKind.Value;
+            variants.Add((member, kind));
         }
 
         var diag = new List<Diagnostic>();
@@ -90,6 +89,11 @@ public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
                     v.sym.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax().GetLocation() ?? Location.None)));
         }
 
+        var (readVariants, readDiag) = GenerateReadVariants(variants, sym.Name);
+
+        if (readDiag != null)
+            diag.Add(readDiag);
+
         if (diag.Count > 0)
             return new GeneratorOutput { Diagnostics = diag };
 
@@ -106,19 +110,20 @@ public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
 
               [JsonConverter(typeof({{converter}}))]
               public partial record {{sym.Name}} {
-              {{AnnotateVariants(variants.Select(v => v.Item1), converter)}}
+              {{AnnotateVariants(variants.Select(v => v.sym), converter)}}
               }
 
               internal sealed class {{converter}} : JsonConverter<{{sym.Name}}> {
                   public override bool CanConvert(Type t)
                         => {{
                             variants
-                                .Select(v=> $"t == typeof({sym.Name}.{v.Item1.Name})")
+                                .Select(v=> $"t == typeof({sym.Name}.{v.sym.Name})")
                                 .Aggregate($"t == typeof({sym.Name})", (lhs, rhs) => $"{lhs} || {rhs}")
                         }};
 
-                  public override {{sym.Name}} Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
+                  public override {{sym.Name}}? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
                       switch (reader.TokenType) {
+              {{readVariants}}
                           default:
                               throw new FormatException($"Unsupported variant type: {reader.TokenType.ToString()}");
                       }
@@ -140,7 +145,7 @@ public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
         };
     }
 
-    private static string AnnotateVariants(IEnumerable<ITypeSymbol> variants, string converter) {
+    private static string AnnotateVariants(IEnumerable<INamedTypeSymbol> variants, string converter) {
         var sb = new StringBuilder();
         foreach (var ty in variants) {
             sb.AppendLine($"    [JsonConverter(typeof({converter}))]");
@@ -150,17 +155,80 @@ public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
         return sb.ToString();
     }
 
-    private static string GenerateWriteVariants(IEnumerable<(ITypeSymbol, JsonUnionVariantKind)> variants, string parentName) {
+    private static (string, Diagnostic?) GenerateReadVariants(IEnumerable<(INamedTypeSymbol, JsonUnionVariantKind)> variants, string parentName) {
+        var sb = new StringBuilder();
+        foreach (var (ty, kind) in variants) {
+            var value = (IPropertySymbol?)ty.GetMembers().SingleOrDefault(mem => mem is IPropertySymbol && mem.Name == ValuePropertyName);
+            if (value == null) {
+                return ("", Diagnostic.Create(new DiagnosticDescriptor(
+                        id: "YW1011",
+                        title: "No Value Property Detected",
+                        messageFormat: "Union variant must have a property called Value with the correct type",
+                        category: "YamlWarrior.Roslyn.Generators",
+                        defaultSeverity: DiagnosticSeverity.Error,
+                        isEnabledByDefault: true),
+                    ty.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax().GetLocation() ?? Location.None));
+            }
+
+            switch (kind) {
+            case JsonUnionVariantKind.String:
+                sb.AppendLine($"            case JsonTokenType.String:");
+                sb.AppendLine("                var str = reader.GetString();");
+                sb.AppendLine($"                return str == null ? null : new {parentName}.{ty.Name}(str);");
+                break;
+            case JsonUnionVariantKind.Number:
+                sb.AppendLine($"            case JsonTokenType.Number:");
+                var type = value.Type.SpecialType;
+                switch (type) {
+                case SpecialType.System_Int32:
+                    sb.AppendLine($"                return new {parentName}.{ty.Name}(reader.GetInt32());");
+                    break;
+                case SpecialType.System_UInt32:
+                    sb.AppendLine($"                return new {parentName}.{ty.Name}(reader.GetUInt32());");
+                    break;
+                case SpecialType.System_Int64:
+                    sb.AppendLine($"                return new {parentName}.{ty.Name}(reader.GetInt64());");
+                    break;
+                case SpecialType.System_UInt64:
+                    sb.AppendLine($"                return new {parentName}.{ty.Name}(reader.GetUInt64());");
+                    break;
+                case SpecialType.System_Double:
+                    sb.AppendLine($"                return new {parentName}.{ty.Name}(reader.GetDouble());");
+                    break;
+                default:
+                    // TODO: Support other integral types
+                    return ("", Diagnostic.Create(new DiagnosticDescriptor(
+                            id: "YW1011",
+                            title: "Unsupported Duplicate Union Variant",
+                            messageFormat: "Cannot have multiple number variants",
+                            category: "YamlWarrior.Roslyn.Generators",
+                            defaultSeverity: DiagnosticSeverity.Error,
+                            isEnabledByDefault: true),
+                        value.Type.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax().GetLocation() ??
+                        Location.None));
+                }
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        sb.AppendLine("            case JsonTokenType.Null:");
+        sb.AppendLine("                return null;");
+        return (sb.ToString(), null);
+    }
+
+    private static string GenerateWriteVariants(IEnumerable<(INamedTypeSymbol, JsonUnionVariantKind)> variants, string parentName) {
         var sb = new StringBuilder();
         foreach (var (ty, kind) in variants) {
             switch (kind) {
             case JsonUnionVariantKind.String:
                 sb.AppendLine($"            case {parentName}.{ty.Name} str:");
-                sb.AppendLine("                writer.WriteStringValue(str.Value);");
+                sb.AppendLine($"                writer.WriteStringValue(str.{ValuePropertyName});");
                 break;
             case JsonUnionVariantKind.Number:
                 sb.AppendLine($"            case {parentName}.{ty.Name} num:");
-                sb.AppendLine("                writer.WriteNumberValue(num.Value);");
+                sb.AppendLine($"                writer.WriteNumberValue(num.{ValuePropertyName});");
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

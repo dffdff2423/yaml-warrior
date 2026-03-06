@@ -13,7 +13,7 @@
     Severity: Error,
     Descriptor: {
       Id: YW1001,
-      Title: Malformed Union Variant,
+      Title: Unsupported Duplicate Union Variant,
       MessageFormat: Cannot have multiple number variants,
       Category: YamlWarrior.Roslyn.Generators,
       DefaultSeverity: Error,
@@ -34,7 +34,7 @@
     Severity: Error,
     Descriptor: {
       Id: YW1001,
-      Title: Malformed Union Variant,
+      Title: Unsupported Duplicate Union Variant,
       MessageFormat: Cannot have multiple number variants,
       Category: YamlWarrior.Roslyn.Generators,
       DefaultSeverity: Error,

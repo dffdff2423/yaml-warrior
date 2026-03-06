@@ -18,6 +18,8 @@
         <ProjectReference Include="../YamlWarrior.Common/YamlWarrior.Common.csproj" />
         <ProjectReference Include="../YamlWarrior.Robust/YamlWarrior.Robust.csproj" />
 
+        <ProjectReference Include="../YamlWarrior.Roslyn.Generators/YamlWarrior.Roslyn.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+
         <PackageReference Include="JetBrains.Annotations" PrivateAssets="all" />
     </ItemGroup>
 </Project>

@@ -19,6 +19,7 @@ public sealed class JsonUnionAttribute : Attribute;
 ///
 /// Do not include both this and <see cref="JsonUnionAttribute"/> on the same type
 /// </summary>
+/// <seealso cref="JsonUnionVariantKind"/>
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
 public sealed class JsonUnionVariantAttribute(JsonUnionVariantKind kind) : Attribute {
     [UsedImplicitly]

@@ -19,8 +19,16 @@ internal sealed class DummyUnionConverter : JsonConverter<DummyUnion> {
     public override bool CanConvert(Type t)
           => t == typeof(DummyUnion) || t == typeof(DummyUnion.Integer) || t == typeof(DummyUnion.String);
 
-    public override DummyUnion Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
+    public override DummyUnion? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         switch (reader.TokenType) {
+            case JsonTokenType.Number:
+                return new DummyUnion.Integer(reader.GetInt32());
+            case JsonTokenType.String:
+                var str = reader.GetString();
+                return str == null ? null : new DummyUnion.String(str);
+            case JsonTokenType.Null:
+                return null;
+
             default:
                 throw new FormatException($"Unsupported variant type: {reader.TokenType.ToString()}");
         }

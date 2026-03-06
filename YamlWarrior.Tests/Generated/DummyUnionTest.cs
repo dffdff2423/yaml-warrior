@@ -30,4 +30,18 @@ public sealed class DummyUnionTest {
 
         Assert.That(JsonSerializer.Serialize(i), Is.EqualTo("\"asdf\""));
     }
+
+    [Test]
+    public void ReadInt() {
+        const string i = "42";
+
+        Assert.That(JsonSerializer.Deserialize<DummyUnion>(i), Is.EqualTo(new DummyUnion.Integer(42)));
+    }
+
+    [Test]
+    public void ReadStr() {
+        const string i = "\"asdf\"";
+
+        Assert.That(JsonSerializer.Deserialize<DummyUnion>(i), Is.EqualTo(new DummyUnion.String("asdf")));
+    }
 }

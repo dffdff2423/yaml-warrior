@@ -11,7 +11,7 @@ public abstract partial record DummyUnion {
     private DummyUnion() {}
 
     [JsonUnionVariant(JsonUnionVariantKind.Number)]
-    public sealed partial record Integer(int Value) : DummyUnion;
+    public sealed partial record Integer(ulong Value) : DummyUnion;
 
     [JsonUnionVariant(JsonUnionVariantKind.String)]
     public sealed partial record String(string Value) : DummyUnion;

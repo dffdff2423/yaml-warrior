@@ -5,6 +5,12 @@
 namespace YamlWarrior.Common.Serialization;
 
 public enum JsonUnionVariantKind {
+    /// <summary>
+    /// Variant is a record with a single property with type String called Value
+    /// </summary>
     String,
+    /// <summary>
+    /// Variant is a record with a single property with an integral type called Value
+    /// </summary>
     Number,
 }

@@ -9,4 +9,10 @@ namespace MetaModelGen.Schema;
 public sealed record MetaModel {
     [JsonPropertyName("enumerations"), JsonRequired]
     public required Enumeration[] Enumerations { get; init; }
+
+    [JsonPropertyName("metaData"), JsonRequired]
+    public required MetaData MetaData { get; init; }
+
+    [JsonPropertyName("notifications"), JsonRequired]
+    public required Notification[] Notifications { get; init; }
 }

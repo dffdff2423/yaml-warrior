@@ -2,35 +2,15 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 
-using System.Text.Json;
 using System.Text.Json.Serialization;
+
+using YamlWarrior.Common.Serialization;
 
 namespace MetaModelGen.Schema;
 
-public sealed record Enumeration {
-    /// <summary>
-    /// Set to a string if the enum is deprecated
-    /// </summary>
-    [JsonPropertyName("deprecated"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? Deprecated { get; init; }
-
-    [JsonPropertyName("documentation"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? Documentation { get; init; }
-
+public sealed record Enumeration : TypeMetaInfo {
     [JsonPropertyName("name"), JsonRequired]
     public required string Name { get; init; }
-
-    /// <summary>
-    /// Weather or not the enum is experimental
-    /// </summary>
-    [JsonPropertyName("proposed"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public bool Proposed { get; init; }
-
-    /// <summary>
-    /// The version this enum was added in
-    /// </summary>
-    [JsonPropertyName("since"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? Since { get; init; }
 
     /// <summary>
     /// Type of enum
@@ -65,36 +45,21 @@ public enum EnumerationTypeName {
     UInteger,
 }
 
-public sealed record EnumerationEntry {
-    /// <summary>
-    /// Set to a string if depricated
-    /// </summary>
-    [JsonPropertyName("deprecated"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? Deprecated { get; init; }
-
-    [JsonPropertyName("documentation"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? Documentation { get; init; }
-
+public sealed record EnumerationEntry : TypeMetaInfo {
     [JsonPropertyName("name"), JsonRequired]
     public required string Name { get; init; }
 
-    /// <summary>
-    /// Weather or not this is experimental
-    /// </summary>
-    [JsonPropertyName("proposed"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-    public bool Proposed { get; init; }
-
-    /// <summary>
-    /// The version this was added in
-    /// </summary>
-    [JsonPropertyName("since"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? Since { get; init; }
+    [JsonPropertyName("value"), JsonRequired]
+    public required EnumerationEntryValue Value { get; init; }
 }
 
-// TODO: Json serializers
-public abstract record EnumerationEntryValue {
-    private EnumerationEntryValue() {} // Disallow inheritience outside of this class
+[JsonUnion]
+public abstract partial record EnumerationEntryValue {
+    private EnumerationEntryValue() {} // Disallow inheritance outside of this class
 
-    public sealed record String(string Value) : EnumerationEntryValue;
-    public sealed record Number(long Value) : EnumerationEntryValue;
+    [JsonUnionVariant(JsonUnionVariantKind.String)]
+    public sealed partial record String(string Value) : EnumerationEntryValue;
+
+    [JsonUnionVariant(JsonUnionVariantKind.Number)]
+    public sealed partial record Number(long Value) : EnumerationEntryValue;
 }

@@ -24,4 +24,11 @@ public sealed class JsonUnionAttribute : Attribute;
 public sealed class JsonUnionVariantAttribute(JsonUnionVariantKind kind) : Attribute {
     [UsedImplicitly]
     public JsonUnionVariantKind Kind { get; } = kind;
+
+    /// <summary>
+    /// Value of the <see cref="JsonUnionObjectKindPropertyAttribute"/> member when it is this kind of object.
+    /// <see cref="Kind"/> must be <see cref="JsonUnionVariantKind.SpecificObject"/>
+    /// </summary>
+    [UsedImplicitly]
+    public string? ObjectKind { get; set; }
 }

@@ -2,6 +2,7 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 
+using System.Diagnostics;
 using System.Text;
 
 using Microsoft.CodeAnalysis;
@@ -66,26 +67,14 @@ public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
             diag.AddRange(variants
                 .Where(v => v.kind == JsonUnionVariantKind.Number)
                 .Select(v => Diagnostic.Create(
-                    new DiagnosticDescriptor(
-                        id: "YW1001",
-                        title: "Unsupported Duplicate Union Variant",
-                        messageFormat: "Cannot have multiple number variants",
-                        category: "YamlWarrior.Roslyn.Generators",
-                        defaultSeverity: DiagnosticSeverity.Error,
-                        isEnabledByDefault: true),
+                   Diagnostics.DuplicateUnionVariant,
                     v.sym.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax().GetLocation() ?? Location.None)));
         }
         if (variants.Count(v => v.kind == JsonUnionVariantKind.String) > 1) {
             diag.AddRange(variants
                 .Where(v => v.kind == JsonUnionVariantKind.String)
                 .Select(v => Diagnostic.Create(
-                    new DiagnosticDescriptor(
-                        id: "YW1001",
-                        title: "Unsupported Duplicate Union Variant",
-                        messageFormat: "Cannot have multiple string variants",
-                        category: "YamlWarrior.Roslyn.Generators",
-                        defaultSeverity: DiagnosticSeverity.Error,
-                        isEnabledByDefault: true),
+                    Diagnostics.DuplicateUnionVariant,
                     v.sym.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax().GetLocation() ?? Location.None)));
         }
 
@@ -110,19 +99,24 @@ public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
 
               [JsonConverter(typeof({{converter}}))]
               public partial record {{sym.Name}} {
-              {{AnnotateVariants(variants.Select(v => v.sym), converter)}}
+              {{
+                  AnnotateVariants(variants, converter)
+              }}
               }
 
               internal sealed class {{converter}} : JsonConverter<{{sym.Name}}> {
                   public override bool CanConvert(Type t)
                         => {{
                             variants
+                                .Where(v => v.kind is not (JsonUnionVariantKind.ExclusiveObject or JsonUnionVariantKind.SpecificObject))
                                 .Select(v=> $"t == typeof({sym.Name}.{v.sym.Name})")
                                 .Aggregate($"t == typeof({sym.Name})", (lhs, rhs) => $"{lhs} || {rhs}")
                         }};
 
                   public override {{sym.Name}}? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
-                      switch (reader.TokenType) {
+                      var elem = JsonSerializer.Deserialize<JsonElement>(ref reader, options);
+
+                      switch (elem.ValueKind) {
               {{readVariants}}
                           default:
                               throw new FormatException($"Unsupported variant type: {reader.TokenType.ToString()}");
@@ -145,10 +139,11 @@ public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
         };
     }
 
-    private static string AnnotateVariants(IEnumerable<INamedTypeSymbol> variants, string converter) {
+    private static string AnnotateVariants(IEnumerable<(INamedTypeSymbol type, JsonUnionVariantKind kind)> variants, string converter) {
         var sb = new StringBuilder();
-        foreach (var ty in variants) {
-            sb.AppendLine($"    [JsonConverter(typeof({converter}))]");
+        foreach (var (ty, kind) in variants) {
+            if (kind is not (JsonUnionVariantKind.ExclusiveObject or JsonUnionVariantKind.SpecificObject))
+                sb.AppendLine($"    [JsonConverter(typeof({converter}))]");
             sb.AppendLine($"    public partial record {ty.Name};");
         }
 
@@ -159,62 +154,63 @@ public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
         var sb = new StringBuilder();
         foreach (var (ty, kind) in variants) {
             var value = (IPropertySymbol?)ty.GetMembers().SingleOrDefault(mem => mem is IPropertySymbol && mem.Name == ValuePropertyName);
-            if (value == null) {
-                return ("", Diagnostic.Create(new DiagnosticDescriptor(
-                        id: "YW1011",
-                        title: "No Value Property Detected",
-                        messageFormat: "Union variant must have a property called Value with the correct type",
-                        category: "YamlWarrior.Roslyn.Generators",
-                        defaultSeverity: DiagnosticSeverity.Error,
-                        isEnabledByDefault: true),
+            if (value == null && kind is JsonUnionVariantKind.Array or JsonUnionVariantKind.Number or JsonUnionVariantKind.String) {
+                return ("", Diagnostic.Create(
+                    Diagnostics.NoValueProperty,
                     ty.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax().GetLocation() ?? Location.None));
             }
 
             switch (kind) {
             case JsonUnionVariantKind.String:
-                sb.AppendLine($"            case JsonTokenType.String:");
-                sb.AppendLine("                var str = reader.GetString();");
+                sb.AppendLine($"            case JsonValueKind.String:");
+                sb.AppendLine("                var str = elem.GetString();");
                 sb.AppendLine($"                return str == null ? null : new {parentName}.{ty.Name}(str);");
                 break;
             case JsonUnionVariantKind.Number:
-                sb.AppendLine($"            case JsonTokenType.Number:");
-                var type = value.Type.SpecialType;
+                sb.AppendLine($"            case JsonValueKind.Number:");
+                var type = value!.Type.SpecialType;
                 switch (type) {
                 case SpecialType.System_Int32:
-                    sb.AppendLine($"                return new {parentName}.{ty.Name}(reader.GetInt32());");
+                    sb.AppendLine($"                return new {parentName}.{ty.Name}(elem.GetInt32());");
                     break;
                 case SpecialType.System_UInt32:
-                    sb.AppendLine($"                return new {parentName}.{ty.Name}(reader.GetUInt32());");
+                    sb.AppendLine($"                return new {parentName}.{ty.Name}(elem.GetUInt32());");
                     break;
                 case SpecialType.System_Int64:
-                    sb.AppendLine($"                return new {parentName}.{ty.Name}(reader.GetInt64());");
+                    sb.AppendLine($"                return new {parentName}.{ty.Name}(elem.GetInt64());");
                     break;
                 case SpecialType.System_UInt64:
-                    sb.AppendLine($"                return new {parentName}.{ty.Name}(reader.GetUInt64());");
+                    sb.AppendLine($"                return new {parentName}.{ty.Name}(elem.GetUInt64());");
                     break;
                 case SpecialType.System_Double:
-                    sb.AppendLine($"                return new {parentName}.{ty.Name}(reader.GetDouble());");
+                    sb.AppendLine($"                return new {parentName}.{ty.Name}(elem.GetDouble());");
                     break;
                 default:
                     // TODO: Support other integral types
-                    return ("", Diagnostic.Create(new DiagnosticDescriptor(
-                            id: "YW1011",
-                            title: "Unsupported Duplicate Union Variant",
-                            messageFormat: "Cannot have multiple number variants",
-                            category: "YamlWarrior.Roslyn.Generators",
-                            defaultSeverity: DiagnosticSeverity.Error,
-                            isEnabledByDefault: true),
-                        value.Type.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax().GetLocation() ??
-                        Location.None));
+                    return ("",
+                        Diagnostic.Create(
+                            Diagnostics.DuplicateUnionVariant,
+                            value.Type.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax().GetLocation()
+                                ?? Location.None));
                 }
+                break;
+            case JsonUnionVariantKind.Array:
+                var valTy = value!.Type;
+                sb.AppendLine("            case JsonValueKind.Array:");
+                sb.AppendLine($"                var arrVal = elem.Deserialize<{valTy}>(options);");
+                sb.AppendLine($"                return arrVal == null ? null : new {parentName}.{ty.Name}(arrVal);");
+                break;
+            case JsonUnionVariantKind.ExclusiveObject:
+                sb.AppendLine("            case JsonValueKind.Object:");
+                sb.AppendLine($"                return elem.Deserialize<{parentName}.{ty.Name}>(options);");
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
             }
         }
 
-        sb.AppendLine("            case JsonTokenType.Null:");
-        sb.AppendLine("                return null;");
+        sb.AppendLine("            case JsonValueKind.Null:");
+        sb.Append("                return null;");
         return (sb.ToString(), null);
     }
 
@@ -231,7 +227,9 @@ public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
                 sb.AppendLine($"                writer.WriteNumberValue(num.{ValuePropertyName});");
                 break;
             default:
-                throw new ArgumentOutOfRangeException();
+                sb.AppendLine($"            case {parentName}.{ty.Name} var:");
+                sb.AppendLine($"                JsonSerializer.Serialize(writer, ({parentName}.{ty.Name})var, options);");
+                break;
             }
             sb.AppendLine("                break;");
         }

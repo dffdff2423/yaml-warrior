@@ -12,23 +12,32 @@ public partial record DummyUnion {
     public partial record Integer;
     [JsonConverter(typeof(DummyUnionConverter))]
     public partial record String;
+    [JsonConverter(typeof(DummyUnionConverter))]
+    public partial record Array;
+    public partial record ExclusiveObj;
 
 }
 
 internal sealed class DummyUnionConverter : JsonConverter<DummyUnion> {
     public override bool CanConvert(Type t)
-          => t == typeof(DummyUnion) || t == typeof(DummyUnion.Integer) || t == typeof(DummyUnion.String);
+          => t == typeof(DummyUnion) || t == typeof(DummyUnion.Integer) || t == typeof(DummyUnion.String) || t == typeof(DummyUnion.Array);
 
     public override DummyUnion? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
-        switch (reader.TokenType) {
-            case JsonTokenType.Number:
-                return new DummyUnion.Integer(reader.GetInt32());
-            case JsonTokenType.String:
-                var str = reader.GetString();
-                return str == null ? null : new DummyUnion.String(str);
-            case JsonTokenType.Null:
-                return null;
+        var elem = JsonSerializer.Deserialize<JsonElement>(ref reader, options);
 
+        switch (elem.ValueKind) {
+            case JsonValueKind.Number:
+                return new DummyUnion.Integer(elem.GetUInt64());
+            case JsonValueKind.String:
+                var str = elem.GetString();
+                return str == null ? null : new DummyUnion.String(str);
+            case JsonValueKind.Array:
+                var arrVal = elem.Deserialize<string[]>(options);
+                return arrVal == null ? null : new DummyUnion.Array(arrVal);
+            case JsonValueKind.Object:
+                return elem.Deserialize<DummyUnion.ExclusiveObj>(options);
+            case JsonValueKind.Null:
+                return null;
             default:
                 throw new FormatException($"Unsupported variant type: {reader.TokenType.ToString()}");
         }
@@ -41,6 +50,12 @@ internal sealed class DummyUnionConverter : JsonConverter<DummyUnion> {
                 break;
             case DummyUnion.String str:
                 writer.WriteStringValue(str.Value);
+                break;
+            case DummyUnion.Array var:
+                JsonSerializer.Serialize(writer, (DummyUnion.Array)var, options);
+                break;
+            case DummyUnion.ExclusiveObj var:
+                JsonSerializer.Serialize(writer, (DummyUnion.ExclusiveObj)var, options);
                 break;
 
             default:

@@ -44,4 +44,26 @@ public sealed class DummyUnionTest {
 
         Assert.That(JsonSerializer.Deserialize<DummyUnion>(i), Is.EqualTo(new DummyUnion.String("asdf")));
     }
+
+    [Test]
+    public void ReadArray() {
+        const string i = "[\"asdf\", \"uiop\"]";
+        var arr = JsonSerializer.Deserialize<DummyUnion>(i) as DummyUnion.Array;
+
+        Assert.Multiple(() => {
+            Assert.That(arr, !Is.Null);
+            Assert.That(arr!.Value, Is.EquivalentTo(["asdf", "uiop"]));
+        });
+    }
+
+    [Test]
+    public void ReadExclusiveObj() {
+        const string i = "{ \"Value1\": \"asdf\", \"Value2\": 42 }";
+        var obj = JsonSerializer.Deserialize<DummyUnion>(i) as DummyUnion.ExclusiveObj;
+
+        Assert.Multiple(() => {
+            Assert.That(obj, !Is.Null);
+            Assert.That(obj, Is.EqualTo(new DummyUnion.ExclusiveObj("asdf", 42)));
+        });
+    }
 }

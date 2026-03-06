@@ -12,7 +12,7 @@
     Message: Cannot have multiple number variants,
     Severity: Error,
     Descriptor: {
-      Id: YW1001,
+      Id: YW1012,
       Title: Unsupported Duplicate Union Variant,
       MessageFormat: Cannot have multiple number variants,
       Category: YamlWarrior.Roslyn.Generators,
@@ -33,7 +33,7 @@
     Message: Cannot have multiple number variants,
     Severity: Error,
     Descriptor: {
-      Id: YW1001,
+      Id: YW1012,
       Title: Unsupported Duplicate Union Variant,
       MessageFormat: Cannot have multiple number variants,
       Category: YamlWarrior.Roslyn.Generators,

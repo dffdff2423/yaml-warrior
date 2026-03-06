@@ -15,4 +15,10 @@ public abstract partial record DummyUnion {
 
     [JsonUnionVariant(JsonUnionVariantKind.String)]
     public sealed partial record String(string Value) : DummyUnion;
+
+    [JsonUnionVariant(JsonUnionVariantKind.Array)]
+    public sealed partial record Array(string[] Value) : DummyUnion;
+
+    [JsonUnionVariant(JsonUnionVariantKind.ExclusiveObject)]
+    public sealed partial record ExclusiveObj(string Value1, int Value2) : DummyUnion;
 }

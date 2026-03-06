@@ -76,14 +76,14 @@ internal class RPCResponseConverter : JsonConverter<RPCResponse> {
     public override RPCResponse? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options) {
         var elem = JsonSerializer.Deserialize<JsonElement>(ref reader, options);
         if (elem.ValueKind != JsonValueKind.Object)
-            throw new JsonException("RPCReponse must be an object");
+            throw new JsonException("RPCResponse must be an object");
 
         if (elem.TryGetProperty("result", out _)) {
-            return elem.Deserialize<RPCResponse.Success>();
+            return elem.Deserialize<RPCResponse.Success>(options);
         }
 
         if (elem.TryGetProperty("error", out _)) {
-            return elem.Deserialize<RPCResponse.Failure>();
+            return elem.Deserialize<RPCResponse.Failure>(options);
         }
 
         throw new JsonException("Malformed Response");

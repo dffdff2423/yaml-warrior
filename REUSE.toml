@@ -10,6 +10,12 @@ SPDX-FileCopyrightText = "No copyright claimed"
 SPDX-License-Identifier = "GPL-3.0-only" # So I don't have to add an extra license file
 
 [[annotations]]
+path = [ "YamlWarrior.Roslyn.Tests/snapshots/*" ]
+# This file is not copyrightable, but reuse makes me specify it
+SPDX-FileCopyrightText = "dffdff2423 <dffdff2423@gmail.com>"
+SPDX-License-Identifier = "GPL-3.0-only" # So I don't have to add an extra license file
+
+[[annotations]]
 path = [ "data/metaModel*" ]
 # This file is not copyrightable, but reuse makes me specify it
 SPDX-FileCopyrightText = "Copyright (c) Microsoft Corporation"

@@ -8,30 +8,30 @@
 
     <PropertyGroup>
         <TargetFramework>net10.0</TargetFramework>
-        <LangVersion>latest</LangVersion>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <WarningsAsErrors>nullable</WarningsAsErrors>
         <IsPackable>false</IsPackable>
-        <RootNamespace>YamlWarrior.Tests</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../YamlWarrior/YamlWarrior.csproj" />
-        <ProjectReference Include="../YamlWarrior.Common/YamlWarrior.Common.csproj" />
-        <ProjectReference Include="../YamlWarrior.Robust/YamlWarrior.Robust.csproj" />
-
-        <ProjectReference Include="../YamlWarrior.Roslyn.Generators/YamlWarrior.Roslyn.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-
-        <PackageReference Include="JetBrains.Annotations" PrivateAssets="all"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk" />
         <PackageReference Include="NUnit" />
         <PackageReference Include="NUnit.Analyzers" />
         <PackageReference Include="NUnit3TestAdapter" />
+
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
+        <PackageReference Include="Verify.NUnit" />
+        <PackageReference Include="Verify.SourceGenerators" />
+
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../YamlWarrior.Roslyn.Generators/YamlWarrior.Roslyn.Generators.csproj" />
     </ItemGroup>
 
     <ItemGroup>
         <Using Include="NUnit.Framework"/>
     </ItemGroup>
-
 </Project>

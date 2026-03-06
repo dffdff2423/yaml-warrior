@@ -8,6 +8,8 @@
   <Project Path="MetaModelGen/MetaModelGen.csproj" />
   <Project Path="YamlWarrior.Common/YamlWarrior.Common.csproj" />
   <Project Path="YamlWarrior.Robust/YamlWarrior.Robust.csproj" />
+  <Project Path="YamlWarrior.Roslyn.Generators\YamlWarrior.Roslyn.Generators.csproj" />
+  <Project Path="YamlWarrior.Roslyn.Tests/YamlWarrior.Roslyn.Tests.csproj" />
   <Project Path="YamlWarrior.Tests/YamlWarrior.Tests.csproj" />
   <Project Path="YamlWarrior/YamlWarrior.csproj" />
 </Solution>

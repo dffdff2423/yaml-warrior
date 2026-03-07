@@ -2,7 +2,10 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 
+using System.Diagnostics;
 using System.Text.Json.Serialization;
+
+using JetBrains.Annotations;
 
 using YamlWarrior.Common.Serialization;
 
@@ -29,8 +32,8 @@ public sealed record EnumerationType {
     /// <summary>
     /// Should always be base under the current version of the metamodel
     /// </summary>
-    [JsonPropertyName("kind"), JsonRequired]
-    public string Kind { get; init; } = "base";
+    [JsonPropertyName("kind"), JsonRequired, UsedImplicitly]
+    public string Kind { get => "base"; init => Debug.Assert(value == "base"); }
 
     [JsonPropertyName("values"), JsonRequired]
     public required EnumerationTypeName Name { get; init; }

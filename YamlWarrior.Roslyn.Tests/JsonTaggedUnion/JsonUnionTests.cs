@@ -50,26 +50,39 @@ public static class JsonUnionTests {
         => GeneratorTest.Verify(TestCode2, genShouldError: true);
 
     private static readonly string TestCode3 = """
-                                               using YamlWarrior.Common.Serialization;
                                                using System.Text.Json.Serialization;
 
+                                               using YamlWarrior.Common.Serialization;
+
+                                               namespace YamlWarrior.Tests.Generated;
+
                                                [JsonUnion]
-                                               public abstract partial record DummyUnion {
-                                                   private DummyUnion() {}
+                                               public abstract partial record SpecificObjectUnion {
+                                                   private SpecificObjectUnion() {}
 
                                                    [JsonRequired]
                                                    [JsonUnionObjectKindProperty]
-                                                   public required string Kind { get; set; }
+                                                   public abstract string Kind { get; init; }
 
-                                                   [JsonUnionVariant(JsonUnionVariantKind.SpecificObject, ObjectKind = "object1")]
-                                                   public sealed partial record Object1(int Value1, string Value2) : DummyUnion;
+                                                   [JsonUnionVariant(JsonUnionVariantKind.SpecificObject)]
+                                                   public sealed partial record Object1(int Value1, string Value2) : SpecificObjectUnion {
+                                                       public override string Kind {
+                                                           get => "object1";
+                                                           init { }
+                                                       }
+                                                   }
 
-                                                   [JsonUnionVariant(JsonUnionVariantKind.SpecificObject, ObjectKind = "object2")]
-                                                   public sealed partial record Object2(float Value1, bool Value2) : DummyUnion;
+                                                   [JsonUnionVariant(JsonUnionVariantKind.SpecificObject)]
+                                                   public sealed partial record Object2(float Value1, bool Value2) : SpecificObjectUnion {
+                                                       public override string Kind {
+                                                           get => "object2";
+                                                           init { }
+                                                       }
+                                                   }
                                                }
                                                """;
 
-    // [Test]
-    // public static Task SpecificObject()
-    //     => GeneratorTest.Verify(TestCode3);
+    [Test]
+    public static Task SpecificObject()
+        => GeneratorTest.Verify(TestCode3);
 }

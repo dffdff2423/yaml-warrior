@@ -1,8 +1,9 @@
 ﻿//HintName: DummyUnion_jsonTaggedUnion.g.cs
 #nullable enable
 using System;
-using System.Text.Json;
+using System.Linq;
 using System.Text.Json.Serialization;
+using System.Text.Json;
 
 
 
@@ -19,6 +20,7 @@ public partial record DummyUnion {
 }
 
 internal sealed class DummyUnionConverter : JsonConverter<DummyUnion> {
+
     public override bool CanConvert(Type t)
           => t == typeof(DummyUnion) || t == typeof(DummyUnion.Integer) || t == typeof(DummyUnion.String) || t == typeof(DummyUnion.Array);
 

@@ -26,7 +26,8 @@ public enum JsonUnionVariantKind {
     ExclusiveObject,
 
     /// <summary>
-    /// Variant is a JSON object. Supports multiple object subclasses but requires <see cref="JsonUnionObjectKindPropertyAttribute"/>
+    /// Variant is a JSON object. Supports multiple object subclasses but requires an abstract property with
+    /// <see cref="JsonUnionObjectKindPropertyAttribute"/> on the base type.
     /// </summary>
     SpecificObject,
 }

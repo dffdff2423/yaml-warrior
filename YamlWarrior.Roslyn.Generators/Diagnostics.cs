@@ -30,4 +30,12 @@ public static class Diagnostics {
         category: "YamlWarrior.Roslyn.Generators",
         defaultSeverity: DiagnosticSeverity.Error,
         isEnabledByDefault: true);
+
+    public static readonly DiagnosticDescriptor MixedExclusivity = new(
+        id: "YW1013",
+        title: "Mixed Exclusivity Object Variants",
+        messageFormat: "Cannot have both Exclusive and Specific Variants",
+        category: "YamlWarrior.Roslyn.Generators",
+        defaultSeverity: DiagnosticSeverity.Error,
+        isEnabledByDefault: true);
 }

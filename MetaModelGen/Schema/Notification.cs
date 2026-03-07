@@ -6,17 +6,21 @@ using System.Text.Json.Serialization;
 
 namespace MetaModelGen.Schema;
 
-public sealed record Notification : TypeMetaInfo {
+public sealed record Notification : MetaInfoDef {
     [JsonPropertyName("messageDirection"), JsonRequired]
     public required MessageDirection MessageDirection { get; init; }
 
     /// <summary>
     /// The request's method name
     /// </summary>
-    [JsonPropertyName("method")]
+    [JsonPropertyName("method"), JsonRequired]
     public required string Method { get; init; }
 
-    // TODO: Params
+    /// <summary>
+    /// Method params
+    /// </summary>
+    [JsonPropertyName("params")]
+    public Params? Params { get; init; }
 
     /// <summary>
     /// Optional a dynamic registration method if it different from the request's method.
@@ -24,5 +28,9 @@ public sealed record Notification : TypeMetaInfo {
     [JsonPropertyName("registrationMethod")]
     public string? RegistrationMethod { get; init; }
 
-    // TODO: registrationOptions
+    /// <summary>
+    /// Optional registration options if the notification supports dynamic registration.
+    /// </summary>
+    [JsonPropertyName("registrationOptions")]
+    public Type? RegistrationOptions { get; init; }
 }

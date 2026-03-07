@@ -91,7 +91,7 @@ public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
 
         var kindJsonNameTxt = $"""
                                    private static readonly string? KindFieldJsonName = ((JsonPropertyNameAttribute?)Attribute.GetCustomAttribute(
-                                           typeof(SpecificObjectUnion).GetMember("{kindName}").Single(),
+                                           typeof({sym.Name}).GetMember("{kindName}").Single(),
                                            typeof(JsonPropertyNameAttribute)))?.Name;
                                """;
 
@@ -127,7 +127,9 @@ public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
                   public override bool CanConvert(Type t)
                         => {{
                             variants
-                                .Where(v => v.kind is not (JsonUnionVariantKind.ExclusiveObject or JsonUnionVariantKind.SpecificObject))
+                                .Where(v =>
+                                    v.kind is not
+                                        (JsonUnionVariantKind.ExclusiveObject or JsonUnionVariantKind.SpecificObject))
                                 .Select(v=> $"t == typeof({sym.Name}.{v.sym.Name})")
                                 .Aggregate($"t == typeof({sym.Name})", (lhs, rhs) => $"{lhs} || {rhs}")
                         }};
@@ -187,7 +189,7 @@ public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
 
         foreach (var (ty, kind) in variants) {
             var value = (IPropertySymbol?)ty.GetMembers().SingleOrDefault(mem => mem is IPropertySymbol && mem.Name == ValuePropertyName);
-            if (value == null && kind is JsonUnionVariantKind.Array or JsonUnionVariantKind.Number or JsonUnionVariantKind.String) {
+            if (value == null && kind is JsonUnionVariantKind.Array or JsonUnionVariantKind.Number or JsonUnionVariantKind.String or JsonUnionVariantKind.ValueObject) {
                 return ("", Diagnostic.Create(
                     Diagnostics.NoValueProperty,
                     ty.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax().GetLocation() ?? Location.None));
@@ -243,6 +245,13 @@ public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
                 sb.AppendLine($"                var arrVal = elem.Deserialize<{valTy}>(options);");
                 sb.AppendLine($"                return arrVal == null ? null : new {parentName}.{ty.Name}(arrVal);");
                 break;
+            case JsonUnionVariantKind.ValueObject:
+                // TODO: unit tests..
+                exclusive = true;
+                sb.AppendLine("            case JsonValueKind.Object:");
+                sb.AppendLine($"                var objVal = elem.Deserialize<{value!.Type}>(options);");
+                sb.AppendLine($"                return objVal == null ? null : new {parentName}.{ty.Name}(objVal);");
+                break;
             case JsonUnionVariantKind.ExclusiveObject:
                 exclusive = true;
                 sb.AppendLine("            case JsonValueKind.Object:");
@@ -288,6 +297,10 @@ public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
             case JsonUnionVariantKind.Array:
                 sb.AppendLine($"            case {parentName}.{ty.Name} arr:");
                 sb.AppendLine($"                JsonSerializer.Serialize(writer, arr.{ValuePropertyName}, options);");
+                break;
+            case JsonUnionVariantKind.ValueObject:
+                sb.AppendLine($"            case {parentName}.{ty.Name} objVal:");
+                sb.AppendLine($"                JsonSerializer.Serialize(writer, objVal.{ValuePropertyName}, options);");
                 break;
             case JsonUnionVariantKind.SpecificObject:
             case JsonUnionVariantKind.ExclusiveObject:

@@ -9,7 +9,7 @@ namespace MetaModelGen.Schema;
 /// <summary>
 /// Common meta info shared by a lot of types in the metamodel schema
 /// </summary>
-public abstract record TypeMetaInfo {
+public abstract record MetaInfoDef {
     /// <summary>
     /// Set to a string if this type is deprecated
     /// </summary>

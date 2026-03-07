@@ -11,7 +11,7 @@ using YamlWarrior.Common.Serialization;
 
 namespace MetaModelGen.Schema;
 
-public sealed record Enumeration : TypeMetaInfo {
+public sealed record Enumeration : MetaInfoDef {
     [JsonPropertyName("name"), JsonRequired]
     public required string Name { get; init; }
 
@@ -48,7 +48,7 @@ public enum EnumerationTypeName {
     UInteger,
 }
 
-public sealed record EnumerationEntry : TypeMetaInfo {
+public sealed record EnumerationEntry : MetaInfoDef {
     [JsonPropertyName("name"), JsonRequired]
     public required string Name { get; init; }
 

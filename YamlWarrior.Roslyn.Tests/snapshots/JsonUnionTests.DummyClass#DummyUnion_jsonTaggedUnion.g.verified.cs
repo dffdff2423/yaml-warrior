@@ -51,8 +51,8 @@ internal sealed class DummyUnionConverter : JsonConverter<DummyUnion> {
             case DummyUnion.String str:
                 writer.WriteStringValue(str.Value);
                 break;
-            case DummyUnion.Array var:
-                JsonSerializer.Serialize(writer, (DummyUnion.Array)var, options);
+            case DummyUnion.Array arr:
+                JsonSerializer.Serialize(writer, arr.Value, options);
                 break;
             case DummyUnion.ExclusiveObj var:
                 JsonSerializer.Serialize(writer, (DummyUnion.ExclusiveObj)var, options);

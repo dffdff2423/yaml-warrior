@@ -32,6 +32,20 @@ public sealed class DummyUnionTest {
     }
 
     [Test]
+    public void WriteArr() {
+        var i = new DummyUnion.Array(["asdf", "uiop"]);
+
+        Assert.That(JsonSerializer.Serialize<DummyUnion>(i), Is.EqualTo("[\"asdf\",\"uiop\"]"));
+    }
+
+    [Test]
+    public void WriteExclusiveObj() {
+        var i = new DummyUnion.ExclusiveObj("asdf", 42);
+
+        Assert.That(JsonSerializer.Serialize<DummyUnion>(i), Is.EqualTo("{\"Value1\":\"asdf\",\"Value2\":42}"));
+    }
+
+    [Test]
     public void ReadInt() {
         const string i = "42";
 

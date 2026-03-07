@@ -2,7 +2,6 @@
 //
 // SPDX-License-Identifier: GPL-3.0-only
 
-using System.Diagnostics;
 using System.Text;
 
 using Microsoft.CodeAnalysis;
@@ -226,10 +225,17 @@ public sealed class JsonTaggedUnionGenerator : IIncrementalGenerator {
                 sb.AppendLine($"            case {parentName}.{ty.Name} num:");
                 sb.AppendLine($"                writer.WriteNumberValue(num.{ValuePropertyName});");
                 break;
-            default:
+            case JsonUnionVariantKind.Array:
+                sb.AppendLine($"            case {parentName}.{ty.Name} arr:");
+                sb.AppendLine($"                JsonSerializer.Serialize(writer, arr.{ValuePropertyName}, options);");
+                break;
+            case JsonUnionVariantKind.SpecificObject:
+            case JsonUnionVariantKind.ExclusiveObject:
                 sb.AppendLine($"            case {parentName}.{ty.Name} var:");
                 sb.AppendLine($"                JsonSerializer.Serialize(writer, ({parentName}.{ty.Name})var, options);");
                 break;
+            default:
+                throw new ArgumentOutOfRangeException();
             }
             sb.AppendLine("                break;");
         }

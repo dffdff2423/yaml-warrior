@@ -35,10 +35,11 @@ public sealed record EnumerationType {
     [JsonPropertyName("kind"), JsonRequired, UsedImplicitly]
     public string Kind { get => "base"; init => Debug.Assert(value == "base"); }
 
-    [JsonPropertyName("values"), JsonRequired]
+    [JsonPropertyName("name"), JsonRequired]
     public required EnumerationTypeName Name { get; init; }
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter<EnumerationTypeName>))]
 public enum EnumerationTypeName {
     [JsonStringEnumMemberName("string")]
     String,

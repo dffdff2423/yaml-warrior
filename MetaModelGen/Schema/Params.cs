@@ -11,8 +11,8 @@ public abstract partial record Params {
     private Params() {}
 
     [JsonUnionVariant(JsonUnionVariantKind.Array)]
-    public sealed partial record Array(Type[] Value) : Params;
+    public sealed partial record Array(MetaType[] Value) : Params;
 
     [JsonUnionVariant(JsonUnionVariantKind.ValueObject)]
-    public sealed partial record Object(Type Value) : Params;
+    public sealed partial record Object(MetaType Value) : Params;
 }

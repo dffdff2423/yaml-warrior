@@ -6,6 +6,7 @@ namespace MetaModelGen;
 
 internal sealed class Program {
     static void Main(string[] args) {
-        Console.WriteLine("Hello, World!");
+        var model = LspMetaGenerator.TryLoadModel("../../../data/metaModel.json");
+        Console.WriteLine("Okay!");
     }
 }

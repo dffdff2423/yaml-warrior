@@ -139,6 +139,7 @@ public abstract partial record MetaType {
     }
 }
 
+[JsonConverter(typeof(JsonStringEnumConverter<BaseTypeKind>))]
 public enum BaseTypeKind {
     [JsonStringEnumMemberName("URI")]
     Uri,
@@ -167,9 +168,9 @@ public sealed record Property : MetaInfoDef {
     [JsonRequired, JsonPropertyName("name")]
     public required string Name { get; init; }
 
-    [JsonRequired, JsonPropertyName("optional")]
-    public required bool Optional { get; init; }
+    [JsonPropertyName("optional")]
+    public bool Optional { get; init; }
 
     [JsonRequired, JsonPropertyName("type")]
-    public required Type Type { get; init; }
+    public required MetaType Type { get; init; }
 }

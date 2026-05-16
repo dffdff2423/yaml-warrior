@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace MetaModelGen.Schema;
 
+[JsonConverter(typeof(JsonStringEnumConverter<MessageDirection>))]
 public enum MessageDirection {
     [JsonStringEnumMemberName("clientToServer")]
     ClientToServer,

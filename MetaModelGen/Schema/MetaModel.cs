@@ -15,4 +15,13 @@ public sealed record MetaModel {
 
     [JsonPropertyName("notifications"), JsonRequired]
     public required Notification[] Notifications { get; init; }
+
+    [JsonPropertyName("requests"), JsonRequired]
+    public required Request[] Requests { get; init; }
+
+    [JsonPropertyName("structures"), JsonRequired]
+    public required Structure[] Structures { get; init; }
+
+    [JsonPropertyName("typeAliases"), JsonRequired]
+    public required TypeAlias[] TypeAliases { get; init; }
 }

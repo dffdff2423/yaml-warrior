@@ -6,7 +6,10 @@ using System.Text.Json.Serialization;
 
 namespace MetaModelGen.Schema;
 
-public sealed record Notification : MetaInfoDef {
+/// <summary>
+/// Base class for requests and messages. Not defined by schema but used here.
+/// </summary>
+public abstract record MetaMethod : MetaInfoDef {
     [JsonPropertyName("messageDirection"), JsonRequired]
     public required MessageDirection MessageDirection { get; init; }
 
@@ -32,5 +35,16 @@ public sealed record Notification : MetaInfoDef {
     /// Optional registration options if the notification supports dynamic registration.
     /// </summary>
     [JsonPropertyName("registrationOptions")]
-    public Type? RegistrationOptions { get; init; }
+    public MetaType? RegistrationOptions { get; init; }
+}
+
+
+public sealed record Notification : MetaMethod;
+
+public sealed record Request : MetaMethod {
+    /// <summary>
+    /// An optional error data type.
+    /// </summary>
+    [JsonPropertyName("errorData")]
+    public MetaType? ErrorData { get; init; }
 }

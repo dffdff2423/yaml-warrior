@@ -4,8 +4,11 @@
 
 using System.Text.Json.Serialization;
 
+using JetBrains.Annotations;
+
 namespace MetaModelGen.Schema;
 
+[UsedImplicitly]
 public sealed record MetaData {
     /// <summary>
     /// Protocol version

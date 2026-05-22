@@ -14,6 +14,12 @@ path = [ "YamlWarrior.Roslyn.Tests/snapshots/*" ]
 SPDX-FileCopyrightText = "dffdff2423 <dffdff2423@gmail.com>"
 SPDX-License-Identifier = "GPL-3.0-only"
 
+# this is stupid
+[[annotations]]
+path = [ "**.txt" ]
+SPDX-FileCopyrightText = "Yaml Warrior Contributors"
+SPDX-License-Identifier = "GPL-3.0-only"
+
 [[annotations]]
 path = [ "data/metaModel*" ]
 SPDX-FileCopyrightText = "Copyright (c) Microsoft Corporation"
